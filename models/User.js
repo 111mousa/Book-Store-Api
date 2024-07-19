@@ -59,7 +59,15 @@ function validateUpdateUser(obj){
     });
 
     return schema.validate(obj);
-}
+};
+
+// Validate Change Password
+function validateChangePassword(obj) {
+    const schema = joi.object({
+        password: joi.string().trim().min(6).required(),
+    });
+    return schema.validate(obj);
+};
 
 //Generate Token
 UserSchema.methods.generateToken = function(){
@@ -72,5 +80,6 @@ module.exports = {
     User,
     validateLoginUser,
     validateRegisterUser,
-    validateUpdateUser
+    validateUpdateUser,
+    validateChangePassword
 };

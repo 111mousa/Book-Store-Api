@@ -1,32 +1,47 @@
 const express = require("express");
-const booksPath = require('./routes/books');
-const authorsPath = require('./routes/authors');
-const authPath = require('./routes/auth');
-const usersPath = require('./routes/users');
-const connectToDB = require('./config/db');
-const dotenv = require('dotenv');
-const logger = require('./middlewares/logger');
-const {notFound,errorHandler} = require('./middlewares/errors');
-dotenv.config();
+const logger = require("./middlewares/logger");
+const { notFound, errorHandler } = require("./middlewares/errors");
+require("dotenv").config();
+const connectToDB = require("./config/db");
+const path = require("path");
+const helmet = require("helmet");
+const cors = require("cors");
 
-//connection to db
+// Connection To Database
 connectToDB();
-//Init App
+
+// Init App
 const app = express();
 
-//Apply Midlewares
+// Static Folder
+app.use(express.static(path.join(__dirname,"images")));
+
+// Apply Middlewares
 app.use(express.json());
-// app.use(logger);
-app.use('/api/books',booksPath);
-app.use('/api/authors',authorsPath);
-app.use('/api/auth',authPath);
-app.use('/api/users',usersPath);
+app.use(express.urlencoded({extended: false}));
+app.use(logger);
 
-//Error Handler Middleware
+// Helmet
+app.use(helmet());
 
+// Cors Policy
+app.use(cors())
+
+// Set View Engine
+app.set('view engine', 'ejs');
+
+// Routes
+app.use("/api/books", require("./routes/books"));
+app.use("/api/authors", require("./routes/authors"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/users", require("./routes/users"));
+app.use("/api/upload", require("./routes/upload"));
+app.use("/password", require("./routes/password"));
+
+// Error Hanlder Middleware
 app.use(notFound);
 app.use(errorHandler);
 
-//Running The Server
-const PORT = process.env.PORT;
-app.listen(PORT,console.log(`Server is runnung on port ${PORT}`));
+// Running The Server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`));
